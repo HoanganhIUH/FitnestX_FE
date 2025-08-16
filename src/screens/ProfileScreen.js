@@ -1,0 +1,378 @@
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+
+export default function ProfileScreen({ navigation, route }) {
+  // Lấy thông tin người dùng từ route params (nếu có)
+  const userData = route.params?.userData || {};
+  const { firstName, lastName, email } = userData;
+
+  const [gender, setGender] = useState('');
+  const [age, setAge] = useState('');
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [weightUnit, setWeightUnit] = useState('KG');
+  const [heightUnit, setHeightUnit] = useState('CM');
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  
+  useEffect(() => {
+    // Log thông tin người dùng khi màn hình được mở
+    if (firstName && lastName) {
+      console.log('Profile setup for:', { firstName, lastName, email });
+    }
+  }, [firstName, lastName, email]);
+
+  const handleNext = () => {
+    // Kiểm tra xem đã điền đầy đủ thông tin chưa
+    if (!gender || !age || !weight || !height) {
+      alert('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+    
+    // Kết hợp thông tin từ đăng ký và thông tin profile
+    const profileData = {
+      ...userData,
+      gender, 
+      age, 
+      weight, 
+      height, 
+      userName: `${firstName || ''} ${lastName || ''}`.trim() || 'User'
+    };
+    
+    // Chuyển đến màn hình chọn mục tiêu với thông tin đầy đủ
+    navigation.navigate('GoalSelection', { profileData });
+  };
+
+  const selectGender = (selectedGender) => {
+    setGender(selectedGender);
+    setShowGenderDropdown(false);
+  };
+
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Illustration Image */}
+      <View style={styles.illustrationContainer}>
+        <Image 
+          source={require('../assets/images/Vector-Section.png')} 
+          style={styles.illustrationImage}
+          resizeMode="contain"
+        />
+      </View>
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Let's complete your profile</Text>
+        <Text style={styles.subtitle}>
+          It will help us to know more about you!
+        </Text>
+      </View>
+
+      {/* Profile Form */}
+      <View style={styles.form}>
+        {/* Choose Gender */}
+        <View style={styles.genderInputContainer}>
+          <MaterialIcons name="person-outline" size={24} color="#ADA4A5" style={styles.inputIcon} />
+          <TouchableOpacity 
+            style={styles.genderSelector}
+            onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+          >
+            <Text style={[styles.genderText, !gender && styles.placeholderText]}>
+              {gender || 'Choose Gender'}
+            </Text>
+            <Text style={styles.dropdownIcon}>▼</Text>
+          </TouchableOpacity>
+          
+          {/* Gender Dropdown */}
+          {showGenderDropdown && (
+            <View style={styles.dropdownContainer}>
+              <TouchableOpacity 
+                style={styles.dropdownItem}
+                onPress={() => selectGender('Male')}
+              >
+                <Text style={styles.dropdownItemText}>Male</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.dropdownItem}
+                onPress={() => selectGender('Female')}
+              >
+                <Text style={styles.dropdownItemText}>Female</Text>
+              </TouchableOpacity>
+               <TouchableOpacity 
+                style={styles.dropdownItem}
+                onPress={() => selectGender('Other')}
+              >
+                <Text style={styles.dropdownItemText}>Other</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* Age */}
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="cake" size={24} color="#ADA4A5" />
+          <TextInput
+            style={styles.input}
+            placeholder="Your Age"
+            value={age}
+            onChangeText={setAge}
+            keyboardType="numeric"
+          />
+        </View>
+
+        {/* Your Weight */}
+        <View style={styles.inputContainer}>
+          <MaterialCommunityIcons name="scale-bathroom" size={24} color="#ADA4A5" />
+          <TextInput
+            style={styles.input}
+            placeholder="Your Weight"
+            value={weight}
+            onChangeText={setWeight}
+            keyboardType="numeric"
+          />
+          <TouchableOpacity 
+            style={[
+              styles.unitButton, 
+              weightUnit === 'KG' && styles.unitButtonActive
+            ]}
+            onPress={() => setWeightUnit('KG')}
+          >
+            <Text style={[
+              styles.unitButtonText,
+              weightUnit === 'KG' && styles.unitButtonTextActive
+            ]}>KG</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Your Height */}
+        <View style={styles.inputContainer}>
+          <MaterialCommunityIcons name="ruler" size={24} color="#ADA4A5" />
+          <TextInput
+            style={styles.input}
+            placeholder="Your Height"
+            value={height}
+            onChangeText={setHeight}
+            keyboardType="numeric"
+          />
+          <TouchableOpacity 
+            style={[
+              styles.unitButton, 
+              heightUnit === 'CM' && styles.unitButtonActive
+            ]}
+            onPress={() => setHeightUnit('CM')}
+          >
+            <Text style={[
+              styles.unitButtonText,
+              heightUnit === 'CM' && styles.unitButtonTextActive
+            ]}>CM</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Next Button */}
+      <TouchableOpacity 
+        style={[
+          styles.nextButton,
+          (!gender || !age || !weight || !height) && styles.nextButtonDisabled
+        ]} 
+        onPress={handleNext}
+        disabled={!gender || !age || !weight || !height}
+      >
+        <Text style={[
+          styles.nextButtonText,
+          (!gender || !age || !weight || !height) && styles.nextButtonTextDisabled
+        ]}>Next</Text>
+        <Text style={[
+          styles.arrowIcon,
+          (!gender || !age || !weight || !height) && styles.arrowIconDisabled
+        ]}>›</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  illustrationImage: {
+    width: width * 0.9,
+    height: height * 0.3,
+  },
+  header: {
+    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  form: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F7F8F8',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  inputIcon: {
+    fontSize: 24,
+    marginRight: 12,
+    color: '#666',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 0,
+    color: '#333',
+  },
+  dropdownIcon: {
+    fontSize: 16,
+    color: '#666',
+    marginLeft: 8,
+  },
+  genderSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  placeholderText: {
+    color: '#999',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 10,
+    marginTop: 18,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E1E5E9',
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  unitButton: {
+    backgroundColor: '#F0F0F0',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginLeft: 12,
+  },
+  unitButtonActive: {
+    backgroundColor: '#E68FBB',
+  },
+  unitButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+  },
+  unitButtonTextActive: {
+    color: '#fff',
+  },
+  nextButton: {
+    backgroundColor: '#92A3FD',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    marginHorizontal: 20,
+    marginBottom: 30,
+    borderRadius: 30,
+    shadowColor: '#92A3FD',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  nextButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  arrowIcon: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  nextButtonDisabled: {
+    backgroundColor: '#E1E5E9',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  nextButtonTextDisabled: {
+    color: '#999',
+  },
+  arrowIconDisabled: {
+    color: '#999',
+  },
+  genderInputContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#F7F8F8',
+  borderRadius: 14,
+  paddingHorizontal: 16,
+  paddingVertical: 16,
+  marginBottom: 16,
+  borderWidth: 1,
+  borderColor: '#F0F0F0',
+  position: 'relative',
+  zIndex: 1000,
+}
+
+});
