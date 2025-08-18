@@ -1,28 +1,34 @@
 import { AntDesign } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Alert,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
+import { authAPI } from '../services/api';
 import { COLORS, FONTS, SHADOWS, SIZES, SPACING } from '../styles/commonStyles';
 
 export default function OTPVerificationScreen({ navigation, route }) {
   const userData = route.params?.userData || {};
-  const email = userData.email || '';
+  const email = route.params?.email || userData.email || '';
+  const isPasswordReset = route.params?.isPasswordReset || false;
+  const customMessage = route.params?.message;
   
-  // Tạo state cho 4 ô input OTP
-  const [otp, setOtp] = useState(['', '', '', '']);
-  const [timer, setTimer] = useState(60);
+  // Tạo state cho 6 ô input OTP
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [timer, setTimer] = useState(300); // 5 phút = 300 giây
   const [isResendActive, setIsResendActive] = useState(false);
   
   // Refs cho các input để focus
   const inputRefs = [
+    useRef(null),
+    useRef(null),
     useRef(null),
     useRef(null),
     useRef(null),
@@ -52,7 +58,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
       setOtp(newOtp);
       
       // Nếu có giá trị và không phải ô cuối cùng, focus vào ô tiếp theo
-      if (value && index < 3) {
+      if (value && index < 5) {
         inputRefs[index + 1].current.focus();
       }
     }
@@ -67,42 +73,82 @@ export default function OTPVerificationScreen({ navigation, route }) {
   };
 
   // Xử lý khi xác nhận OTP
-  const handleVerify = () => {
-    const otpValue = otp.join('');
-    
-    if (otpValue.length !== 4) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đủ 4 số OTP');
+const handleVerify = async () => {
+  try {
+    // Kiểm tra xem đã nhập đủ 6 số chưa
+    if (otp.some(digit => digit === '')) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ 6 số OTP');
       return;
     }
+
+    // Chuyển array OTP thành string
+    const otpString = otp.join('');
     
-    console.log('Verifying OTP:', otpValue);
-    
-    // Giả lập xác thực thành công
-    // Trong thực tế, bạn sẽ gọi API để xác thực OTP
-    if (otpValue === '1234') { // Mã OTP mẫu để demo
-      console.log('OTP verification successful');
-      navigation.navigate('Profile', { userData });
+    if (isPasswordReset) {
+      // Nếu là quên mật khẩu, chuyển sang màn hình đặt lại mật khẩu
+      navigation.navigate('ResetPassword', {
+        email: email,
+        otp: otpString
+      });
     } else {
-      Alert.alert('Lỗi', 'Mã OTP không chính xác');
+      // Nếu là xác thực đăng ký
+      const res = await authAPI.verifyOtp(email, otpString);
+      console.log("OTP verified:", res.data);
+
+      // Nếu BE trả về token, lưu vào AsyncStorage
+      if (res.data.token) {
+        await AsyncStorage.setItem("token", res.data.token);
+      }
+
+      // Chuyển đến màn hình Profile với userId và name để hoàn tất thông tin
+      navigation.replace("Profile", { 
+        userData: {
+          userId: res.data.userId,
+          email: email,
+          name: res.data.name || ''
+        }
+      });
     }
-  };
+  } catch (error) {
+    console.error("Verify error:", error.response?.data || error.message);
+    Alert.alert('Lỗi', error.response?.data?.message || "OTP không đúng!");
+  }
+};
 
   // Xử lý khi gửi lại mã OTP
-  const handleResendOtp = () => {
-    if (isResendActive) {
-      console.log('Resending OTP to:', email);
+  // Gọi api resend otp
+const handleResendOtp = async () => {
+  if (isResendActive) {
+    console.log('Resending OTP to:', email);
+    try {
+      if (isPasswordReset) {
+        // Nếu là quên mật khẩu, gọi API forgot-password
+        await authAPI.forgotPassword(email);
+      } else {
+        // Nếu là xác thực đăng ký, gọi API resend-otp
+        await authAPI.resendOtp(email);
+      }
       
       // Reset timer và trạng thái
-      setTimer(60);
+      setTimer(300); // 5 phút
       setIsResendActive(false);
-      setOtp(['', '', '', '']);
-      
+      setOtp(['', '', '', '', '', '']);
       // Focus vào ô đầu tiên
       inputRefs[0].current.focus();
-      
-      // Giả lập gửi lại OTP
       Alert.alert('Thông báo', 'Mã OTP mới đã được gửi đến email của bạn');
+    } catch (error) {
+      console.error("Resend OTP error:", error.response?.data || error.message);
+      Alert.alert('Lỗi', error.response?.data?.message || "Có lỗi xảy ra khi gửi lại mã OTP");
     }
+  }
+};
+
+
+  // Format timer thành phút:giây
+  const formatTimer = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -120,7 +166,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
         <View style={styles.content}>
           <Text style={styles.title}>Xác thực OTP</Text>
           <Text style={styles.subtitle}>
-            Chúng tôi đã gửi mã xác thực đến email
+            {customMessage || 'Chúng tôi đã gửi mã xác thực đến email'}
           </Text>
           <Text style={styles.email}>{email}</Text>
           
@@ -157,7 +203,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
                 styles.resendButton, 
                 !isResendActive && styles.resendButtonDisabled
               ]}>
-                {isResendActive ? 'Gửi lại' : `Gửi lại sau ${timer}s`}
+                {isResendActive ? 'Gửi lại' : `Gửi lại sau ${formatTimer(timer)}`}
               </Text>
             </TouchableOpacity>
           </View>
@@ -215,17 +261,17 @@ const styles = StyleSheet.create({
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
+    width: '90%',
     marginBottom: SPACING.xl * 1.5,
   },
   otpInput: {
-    width: 60,
+    width: 50,
     height: 60,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E8E8E8',
     backgroundColor: '#F7F8F8',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: FONTS.bold,
     textAlign: 'center',
   },

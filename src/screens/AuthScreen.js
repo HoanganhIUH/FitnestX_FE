@@ -1,6 +1,8 @@
 import { AntDesign, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { authAPI } from '../services/api';
 import { COLORS, FONTS, SHADOWS, SIZES, SPACING } from '../styles/commonStyles';
 
 export default function AuthScreen({ navigation }) {
@@ -8,22 +10,30 @@ export default function AuthScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    console.log('Login:', { email, password });
-    
-    // Trong thực tế, bạn sẽ gọi API đăng nhập ở đây
-    const userData = {
+const handleLogin = async () => {
+  try {
+    const res = await authAPI.login(email, password);
+    console.log("Login response:", res.data);
+    // Nếu BE trả về token
+    if (res.data.token) {
+      await AsyncStorage.setItem("token", res.data.token);
+    }
+    // Nếu BE trả về user, thì lấy luôn
+    const userData = res.data.user || {
       firstName: 'Stefani',
       lastName: 'Wong',
       email: email,
       isLoggedIn: true
     };
-    
-    navigation.replace('Welcome', userData);
-  };
+    navigation.replace('Welcome', { userData });
+  } catch (error) {
+    console.error("Login error:", error.response?.data || error.message);
+    alert(error.response?.data?.message || "Email hoặc mật khẩu không đúng!");
+  }
+};
 
   const handleForgotPassword = () => {
-    console.log('Forgot password for:', email);
+    console.log('Forgot password', email);
     navigation.navigate('ForgotPassword', { email });
   };
 

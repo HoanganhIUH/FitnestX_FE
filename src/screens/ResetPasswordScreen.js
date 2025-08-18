@@ -1,53 +1,55 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { COLORS, FONTS, SHADOWS, SIZES, SPACING } from '../styles/commonStyles';
 import { authAPI } from '../services/api';
+import { COLORS, FONTS, SHADOWS, SIZES, SPACING } from '../styles/commonStyles';
 
-export default function ForgotPasswordScreen({ navigation, route }) {
-  // Lấy email từ trang đăng nhập nếu có
-  const initialEmail = route.params?.email || '';
-  const [email, setEmail] = useState(initialEmail);
+export default function ResetPasswordScreen({ navigation, route }) {
+  const { email, otp } = route.params;
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleResetPassword = async () => {
-    if (!email) {
-      Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ email của bạn');
+    // Kiểm tra mật khẩu
+    if (!password) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu mới');
       return;
     }
 
-    // Kiểm tra định dạng email đơn giản
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ email hợp lệ');
+    if (password.length < 6) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Gọi API forgotPassword
-      const response = await authAPI.forgotPassword(email);
+      // Gọi API reset password
+      await authAPI.resetPassword(email, otp, password);
       
-      setIsSubmitting(false);
       Alert.alert(
-        'Đã gửi OTP',
-        `Mã OTP đã được gửi đến ${email}. Vui lòng kiểm tra hộp thư của bạn.`,
+        'Thành công',
+        'Mật khẩu đã được đặt lại thành công',
         [
           {
-            text: 'OK',
-            onPress: () => navigation.navigate('OTPVerification', { 
-              email, 
-              isPasswordReset: true,
-              message: 'Nhập mã OTP đã được gửi đến email của bạn để đặt lại mật khẩu'
-            })
+            text: 'Đăng nhập',
+            onPress: () => navigation.navigate('Auth')
           }
         ]
       );
     } catch (error) {
-      setIsSubmitting(false);
-      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu';
       Alert.alert('Lỗi', errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -61,25 +63,57 @@ export default function ForgotPasswordScreen({ navigation, route }) {
       </TouchableOpacity>
 
       <View style={styles.header}>
-        <Text style={styles.title}>Quên mật khẩu?</Text>
+        <Text style={styles.title}>Đặt lại mật khẩu</Text>
         <Text style={styles.subtitle}>
-          Hãy nhập địa chỉ email của bạn để nhận hướng dẫn đặt lại mật khẩu.
+          Vui lòng nhập mật khẩu mới cho tài khoản của bạn
         </Text>
       </View>
 
       <View style={styles.form}>
-        {/* Email Input */}
+        {/* Password Input */}
         <View style={styles.inputContainer}>
-          <MaterialIcons name="email" size={24} color="#ADA4A5" style={styles.inputIcon} />
+          <MaterialIcons name="lock" size={24} color="#ADA4A5" style={styles.inputIcon} />
           <TextInput
             style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            placeholder="Mật khẩu mới"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
             editable={!isSubmitting}
           />
+          <TouchableOpacity 
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <MaterialIcons 
+              name={showPassword ? "visibility" : "visibility-off"} 
+              size={24} 
+              color="#ADA4A5" 
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Confirm Password Input */}
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="lock" size={24} color="#ADA4A5" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Xác nhận mật khẩu mới"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            editable={!isSubmitting}
+          />
+          <TouchableOpacity 
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.eyeIcon}
+          >
+            <MaterialIcons 
+              name={showConfirmPassword ? "visibility" : "visibility-off"} 
+              size={24} 
+              color="#ADA4A5" 
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Submit Button */}
@@ -89,7 +123,7 @@ export default function ForgotPasswordScreen({ navigation, route }) {
           disabled={isSubmitting}
         >
           <Text style={styles.submitButtonText}>
-            {isSubmitting ? 'Đang gửi...' : 'Gửi'}
+            {isSubmitting ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -153,6 +187,9 @@ const styles = StyleSheet.create({
     fontSize: SIZES.body2,
     paddingVertical: 0,
     color: COLORS.black,
+  },
+  eyeIcon: {
+    padding: 4,
   },
   submitButton: {
     backgroundColor: COLORS.primary,

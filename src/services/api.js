@@ -1,22 +1,19 @@
-// src/services/api.js
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-// Tạo instance axios với cấu hình chung
-const API_URL = 'http://10.0.2.2:3000/api'; // Cho Android Emulator
-// const API_URL = 'http://localhost:3000/api'; // Cho iOS Simulator hoặc web
+const API_URL = 'http://192.168.33.139:3000/api'; // Android Emulator
+// const API_URL = 'http://localhost:3000/api'; // iOS Simulator hoặc Web
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 giây timeout
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 10000,
 });
 
-// Interceptor để xử lý token
+// Interceptor để gắn token vào header
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
+  async (config) => {
+    const token = await AsyncStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,32 +22,20 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// API Authentication
 export const authAPI = {
-  // Đăng ký tài khoản mới
-  register: (userData) => {
-    return api.post('/auth/register', userData);
-  },
-  
-  // Xác thực OTP
-  verifyOtp: (email, otp) => {
-    return api.post('/auth/verify-otp', { email, otp });
-  },
-  
-  // Gửi lại OTP
-  resendOtp: (email) => {
-    return api.post('/auth/resend-otp', { email });
-  },
-  
-  // Đăng nhập
-  login: (email, password) => {
-    return api.post('/auth/login', { email, password });
-  },
-  
-  // Cập nhật thông tin hồ sơ
-  updateProfile: (userData) => {
-    return api.post('/auth/update-profile', userData);
-  }
+  register: (userData) => api.post('/auth/register', userData),
+  verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
+  resendOtp: (email) => api.post('/auth/resend-otp', { email }),
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  updateProfile: (userData) => api.post('/auth/update-profile', userData),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (email, otp, newPassword) => api.post('/auth/reset-password', { email, otp, newPassword }),
+};
+
+export const userAPI = {
+  getProfile: () => api.get('/user/profile'),
+  updateProfile: (userData) => api.put('/user/profile', userData),
+  completeProfile: (profileData) => api.post('/user/complete-profile', profileData),
 };
 
 export default api;

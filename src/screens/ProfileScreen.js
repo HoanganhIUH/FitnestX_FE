@@ -1,13 +1,15 @@
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { userAPI } from '../services/api';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ProfileScreen({ navigation, route }) {
   // Lấy thông tin người dùng từ route params (nếu có)
   const userData = route.params?.userData || {};
-  const { firstName, lastName, email } = userData;
+  const { name, email } = userData;
 
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
@@ -19,30 +21,51 @@ export default function ProfileScreen({ navigation, route }) {
   
   useEffect(() => {
     // Log thông tin người dùng khi màn hình được mở
-    if (firstName && lastName) {
-      console.log('Profile setup for:', { firstName, lastName, email });
+    if (name) {
+      console.log('Profile setup for:', { name, email });
     }
-  }, [firstName, lastName, email]);
+  }, [name, email]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Kiểm tra xem đã điền đầy đủ thông tin chưa
     if (!gender || !age || !weight || !height) {
-      alert('Vui lòng điền đầy đủ thông tin');
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
       return;
     }
     
-    // Kết hợp thông tin từ đăng ký và thông tin profile
-    const profileData = {
-      ...userData,
-      gender, 
-      age, 
-      weight, 
-      height, 
-      userName: `${firstName || ''} ${lastName || ''}`.trim() || 'User'
-    };
-    
-    // Chuyển đến màn hình chọn mục tiêu với thông tin đầy đủ
-    navigation.navigate('GoalSelection', { profileData });
+    try {
+      // Kết hợp thông tin từ đăng ký và thông tin profile
+      const profileData = {
+        userId: userData.userId,
+        name: name || 'User',
+        gender, 
+        age: parseInt(age), 
+        weight: parseInt(weight), 
+        height: parseInt(height)
+      };
+      
+      // Gọi API để cập nhật thông tin profile
+      const response = await userAPI.completeProfile(profileData);
+      
+      // Lưu token nếu có
+      if (response.data.token) {
+        await AsyncStorage.setItem('token', response.data.token);
+      }
+      
+      // Chuyển đến màn hình chọn mục tiêu với thông tin đầy đủ
+      navigation.navigate('GoalSelection', { 
+        profileData: {
+          ...profileData,
+          ...response.data.user
+        }
+      });
+    } catch (error) {
+      console.error('Complete profile error:', error.response?.data || error.message);
+      Alert.alert(
+        'Lỗi', 
+        error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại sau.'
+      );
+    }
   };
 
   const selectGender = (selectedGender) => {

@@ -1,28 +1,48 @@
 import { AntDesign, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { authAPI } from "../services/api";
 import { COLORS, FONTS, SHADOWS, SIZES, SPACING } from '../styles/commonStyles';
 
 export default function RegisterScreen({ navigation }) {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const handleRegister = () => {
-    console.log('Register:', { firstName, lastName, email, password });
-    
-    // Trong thực tế, bạn sẽ gọi API đăng ký ở đây
-    // Sau khi đăng ký thành công, chuyển đến trang xác thực OTP
-    const userData = {
-      firstName,
-      lastName,
-      email
-    };
-    navigation.navigate('OTPVerification', { userData });
-  };
+const handleRegister = async () => {
+  try {
+    if (!fullName || !email || !password) {
+      alert('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    // Kiểm tra định dạng email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Email không hợp lệ');
+      return;
+    }
+
+    // Kiểm tra độ dài mật khẩu
+    if (password.length < 6) {
+      alert('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    const payload = { name: fullName, email, password };
+    const res = await authAPI.register(payload);
+
+    console.log("Đăng ký thành công:", res.data);
+
+    // Chuyển qua màn OTPVerification
+    navigation.navigate("OTPVerification", { userData: { email } });
+  } catch (error) {
+    console.error("Lỗi đăng ký:", error.response?.data || error.message);
+    alert(error.response?.data?.message || "Có lỗi xảy ra khi đăng ký");
+  }
+};
 
   const handleLogin = () => {
     navigation.navigate('Auth');
@@ -46,26 +66,14 @@ export default function RegisterScreen({ navigation }) {
       </View>
 
       <View style={styles.form}>
-        {/* First Name */}
+        {/* Full Name */}
         <View style={styles.inputContainer}>
           <MaterialIcons name="person-outline" size={24} color="#ADA4A5" style={styles.inputIcon} />
           <TextInput
             style={styles.input}
-            placeholder="First Name"
-            value={firstName}
-            onChangeText={setFirstName}
-            autoCapitalize="words"
-          />
-        </View>
-
-        {/* Last Name */}
-        <View style={styles.inputContainer}>
-          <MaterialIcons name="person-outline" size={24} color="#ADA4A5" style={styles.inputIcon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Last Name"
-            value={lastName}
-            onChangeText={setLastName}
+            placeholder="Họ và tên"
+            value={fullName}
+            onChangeText={setFullName}
             autoCapitalize="words"
           />
         </View>

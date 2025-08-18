@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
+  Alert,
   Dimensions,
   Image,
   ScrollView,
@@ -8,6 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userAPI } from '../services/api';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,26 +40,44 @@ export default function GoalSelectionScreen({ navigation, route }) {
   const [selectedGoals, setSelectedGoals] = useState([]);
   const scrollViewRef = useRef(null);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (selectedGoals.length > 0) {
-      // Log dữ liệu profile và goals được chọn
-      const profileData = route.params?.profileData;
-      
-      // Tạo object dữ liệu hoàn chỉnh
-      const completeData = {
-        ...profileData,
-        goals: selectedGoals.map(goal => goal.title),
-        timestamp: new Date().toISOString()
-      };
-      
-      console.log('Complete Profile Data:', completeData);
-      
-      // Có thể lưu vào AsyncStorage hoặc gửi lên server ở đây
-      // saveToStorage(completeData);
-      // sendToServer(completeData);
-      
-      // Đăng ký thành công! Chuyển đến trang Welcome
-      navigation.navigate('Auth', { userData: completeData });
+      try {
+        // Lấy dữ liệu profile từ route params
+        const profileData = route.params?.profileData;
+        
+        // Chuẩn bị dữ liệu cập nhật
+        const updateData = {
+          userId: profileData.userId,
+          goals: selectedGoals.map(goal => goal.title)
+        };
+        
+        // Gọi API để cập nhật mục tiêu
+        const response = await userAPI.updateProfile(updateData);
+        
+        // Lưu token mới nếu có
+        if (response.data.token) {
+          await AsyncStorage.setItem('token', response.data.token);
+        }
+        
+        // Tạo object dữ liệu hoàn chỉnh
+        const completeData = {
+          ...profileData,
+          ...response.data.user,
+          goals: selectedGoals.map(goal => goal.title)
+        };
+        
+        console.log('Complete Profile Data:', completeData);
+        
+        // Đăng ký thành công! Chuyển đến trang Welcome
+        navigation.navigate('Auth', { userData: completeData });
+      } catch (error) {
+        console.error('Update goals error:', error.response?.data || error.message);
+        Alert.alert(
+          'Lỗi', 
+          error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật mục tiêu. Vui lòng thử lại sau.'
+        );
+      }
     }
   };
 
