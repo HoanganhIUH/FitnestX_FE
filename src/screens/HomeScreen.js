@@ -2,22 +2,32 @@ import { Feather, FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/v
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { userAPI } from '../services/api';
 import { calculateBMI } from '../utils/bmiCalculator';
 
 export default function HomeScreen({ navigation, route }) {
-  // Lấy thông tin người dùng từ route params
-  const userData = route.params || {};
-  const firstName = userData.firstName || 'Stefani';
-  const lastName = userData.lastName || 'Wong';
-  const fullName = `${firstName} ${lastName}`;
-  const userEmail = userData.email || 'user@example.com';
-  const isLoggedIn = userData.isLoggedIn || true;
-  
+  // Lấy thông tin người dùng từ API
+  const [userData, setUserData] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await userAPI.getProfile();
+        setUserData(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   // Lấy chiều cao và cân nặng từ userData hoặc sử dụng giá trị mặc định
-  const height = userData.height || '170';
-  const weight = userData.weight || '65';
-  const heightUnit = userData.heightUnit || 'CM';
-  const weightUnit = userData.weightUnit || 'KG';
+  const fullName = userData?.name || 'Người dùng';
+  const height = userData?.height || '170';
+  const weight = userData?.weight || '65';
+  const heightUnit = userData?.heightUnit || 'CM';
+  const weightUnit = userData?.weightUnit || 'KG';
   
   // Tính toán chỉ số BMI
   const bmi = calculateBMI(parseFloat(weight), parseFloat(height), weightUnit, heightUnit);

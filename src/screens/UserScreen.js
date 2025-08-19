@@ -1,6 +1,7 @@
 import { Feather, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { userAPI } from '../services/api';
 import { calculateBMI } from '../utils/bmiCalculator';
 
 // Hàm để lấy màu dựa trên chỉ số BMI
@@ -21,21 +22,34 @@ function getBmiPercentage(bmiValue) {
 }
 
 export default function UserScreen({ navigation, route }) {
-  // Lấy thông tin người dùng từ route params hoặc sử dụng thông tin mặc định
-  const userData = route.params || {};
-  const firstName = userData.firstName || 'Stefani';
-  const lastName = userData.lastName || 'Wong';
-  const fullName = `${firstName} ${lastName}`;
-  const userProgram = userData.userProgram || 'Lose a Fat Program';
-  
+  // Lấy thông tin người dùng từ API
+  const [userData, setUserData] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await userAPI.getProfile();
+        setUserData(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+
+  const fullName = userData?.name || 'Người dùng';
+  const userProgram = userData?.userProgram || 'Lose a Fat Program';
+
   // Lấy thông tin chiều cao và cân nặng từ userData hoặc sử dụng giá trị mặc định
-  const height = userData.height || '189';
-  const weight = userData.weight || '65';
-  
+  const height = userData?.height || '189';
+  const weight = userData?.weight || '65';
+
   // Thông tin cá nhân
   const userHeight = `${height}cm`;
   const userWeight = `${weight}kg`;
-  const userAge = userData.age ? `${userData.age}yo` : '22yo';
+  const userAge = userData?.age ? `${userData.age}yo` : '22yo';
   
   // Tính toán chỉ số BMI
   const bmi = calculateBMI(parseFloat(weight), parseFloat(height));
@@ -77,12 +91,11 @@ export default function UserScreen({ navigation, route }) {
           <View style={styles.profileInfo}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{firstName.charAt(0)}</Text>
+                <Text style={styles.avatarText}>{fullName.charAt(0)}</Text>
               </View>
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{fullName}</Text>
-              <Text style={styles.userProgram}>{userProgram}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.editButton} onPress={handleEditPress}>
@@ -318,10 +331,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1D1617',
     marginBottom: 5,
-  },
-  userProgram: {
-    fontSize: 14,
-    color: '#7B6F72',
   },
   editButton: {
     backgroundColor: '#92A3FD',

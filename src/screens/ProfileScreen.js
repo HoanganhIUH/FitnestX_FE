@@ -7,10 +7,23 @@ import { userAPI } from '../services/api';
 const { width, height } = Dimensions.get('window');
 
 export default function ProfileScreen({ navigation, route }) {
-  // Lấy thông tin người dùng từ route params (nếu có)
-  const userData = route.params?.userData || {};
-  const { name, email } = userData;
+  // Lấy thông tin người dùng từ API
+  const [userData, setUserData] = useState(null);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await userAPI.getProfile();
+        setUserData(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const { name, email } = userData || {};
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
   const [weight, setWeight] = useState('');

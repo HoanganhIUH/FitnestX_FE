@@ -1,75 +1,42 @@
 import React from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import OnboardingItem from "../components/OnboardingItem";
+import { ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Dimensions } from "react-native";
 import { BUTTONS, COLORS, FONTS, SIZES, SPACING } from "../styles/commonStyles";
 
-const slides = [
-  {
-    id: 1,
-    title: "Track Your Goal",
-    description: "Don't worry if you have trouble determining your goals. We can help you determine and track them.",
-    image: require("../assets/images/Frame.png"),
-  },
-  {
-    id: 2,
-    title: "Get Burn",
-    description: "Let's keep burning to achieve your goals. It's temporary pain for a lifetime of gain.",
-    image: require("../assets/images/Frame(1).png"),
-  },
-  {
-    id: 3,
-    title: "Eat Well",
-    description: "Start a healthy lifestyle with us. We can help you determine your diet every day.",
-    image: require("../assets/images/Frame(2).png"),
-  },
-];
+const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen({ navigation }) {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-
-  const renderItem = ({ item }) => (
-    <OnboardingItem item={item} />
-  );
-
-  const onViewableItemsChanged = React.useRef(({ viewableItems }) => {
-    if (viewableItems.length > 0) {
-      setCurrentIndex(viewableItems[0].index);
-    }
-  }).current;
-
-  const viewabilityConfig = React.useRef({
-    itemVisiblePercentThreshold: 50,
-  }).current;
-
   return (
     <View style={styles.container}>
-      <FlatList
-        data={slides}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-      />
-
-      {/* Pagination Dots */}
-      <View style={styles.paginationContainer}>
-        {slides.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              index === currentIndex && styles.activeDot,
-            ]}
-          />
-        ))}
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigation.replace("Auth")}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+      <StatusBar translucent backgroundColor="transparent" />
+      <ImageBackground 
+        source={require("../assets/images/backgr.png")} 
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay} />
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.topSpacer} />
+          
+          <View style={styles.contentContainer}>
+            <View style={styles.titleWrapper}>
+              <Text style={styles.welcome}>Welcome</Text>
+              <Text style={styles.welcome1}>to</Text>
+              <Text style={styles.title}>FITNESTX</Text>
+            </View>
+            <Text style={styles.description}>Everybody Can Train</Text>
+          </View>
+          
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => navigation.replace("Auth")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.buttonText}>Get Started</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </ImageBackground>
     </View>
   );
 }
@@ -77,37 +44,103 @@ export default function OnboardingScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#000',
   },
-  dot: {
-    backgroundColor: "#ccc",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: SPACING.xs,
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
-  activeDot: {
-    backgroundColor: COLORS.primary,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: SPACING.xs,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  safeArea: {
+    flex: 1,
+    paddingBottom: height * 0.05,
+  },
+  topSpacer: {
+    flex: 0.3,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: width * 0.1,
+  },
+  titleWrapper: {
+    alignItems: 'center',
+    marginBottom: height * 0.02,
+  },
+  welcome: {
+    fontSize: width * 0.09,
+    fontWeight: FONTS.medium,
+    color: COLORS.white,
+    textAlign: 'center',
+    letterSpacing: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  welcome1: {
+    fontSize: width * 0.06,
+    fontWeight: FONTS.medium,
+    color: COLORS.white,
+    marginVertical: height * 0.005,
+    textAlign: 'center',
+    letterSpacing: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  title: {
+    fontSize: width * 0.1,
+    fontWeight: FONTS.bold,
+    color: COLORS.white,
+    marginTop: height * 0.01,
+    marginBottom: height * 0.02,
+    textAlign: 'center',
+    letterSpacing: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
+  description: {
+    fontSize: width * 0.06,
+    color: COLORS.white,
+    textAlign: 'center',
+    opacity: 0.95,
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    paddingHorizontal: width * 0.15,
+    marginBottom: height * 0.03,
+    width: '100%',
   },
   button: {
     ...BUTTONS.primary,
-    marginHorizontal: SIZES.width * 0.2,
-    marginBottom: SPACING.xl,
+    height: height * 0.07,
+    borderRadius: height * 0.035,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 10,
   },
   buttonText: {
     color: COLORS.white,
     textAlign: "center",
     fontWeight: FONTS.bold,
-    fontSize: SIZES.body2,
-  },
-  paginationContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: SPACING.l,
+    fontSize: width * 0.05,
+    letterSpacing: 1,
   },
 });
