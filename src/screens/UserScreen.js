@@ -25,31 +25,43 @@ export default function UserScreen({ navigation, route }) {
   // Lấy thông tin người dùng từ API
   const [userData, setUserData] = React.useState(null);
 
-  React.useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await userAPI.getProfile();
-        setUserData(response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
+  // Tạo hàm fetchUserData để có thể gọi lại khi cần
+  const fetchUserData = React.useCallback(async () => {
+    try {
+      const response = await userAPI.getProfile();
+      console.log('User data from API:', response.data);
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
   }, []);
+
+  // Gọi fetchUserData khi component mount và khi navigation focus
+  React.useEffect(() => {
+    fetchUserData();
+    
+    // Thêm listener để refresh dữ liệu khi màn hình được focus (quay lại từ màn hình khác)
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('UserScreen focused - refreshing data');
+      fetchUserData();
+    });
+
+    // Clean up listener khi component unmount
+    return unsubscribe;
+  }, [fetchUserData, navigation]);
 
 
   const fullName = userData?.name || 'Người dùng';
   const userProgram = userData?.userProgram || 'Lose a Fat Program';
 
   // Lấy thông tin chiều cao và cân nặng từ userData hoặc sử dụng giá trị mặc định
-  const height = userData?.height || '189';
-  const weight = userData?.weight || '65';
+  const height = userData?.profile?.height || userData?.height || '189';
+  const weight = userData?.profile?.weight || userData?.weight || '65';
 
   // Thông tin cá nhân
   const userHeight = `${height}cm`;
   const userWeight = `${weight}kg`;
-  const userAge = userData?.age ? `${userData.age}yo` : '22yo';
+  const userAge = userData?.profile?.age ? `${userData.profile.age}yo` : userData?.age ? `${userData.age}yo` : '22yo';
   
   // Tính toán chỉ số BMI
   const bmi = calculateBMI(parseFloat(weight), parseFloat(height));

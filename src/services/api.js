@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.33.139:3000/api'; 
+const API_URL = 'http://192.168.33.139:3000/api'; // Changed to localhost for testing
 
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds
 });
 
 // Interceptor để gắn token vào header

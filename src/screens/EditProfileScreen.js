@@ -1,61 +1,63 @@
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+    Alert,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import { userAPI } from '../services/api';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-export default function ProfileScreen({ navigation, route }) {
-  // Lấy thông tin người dùng từ API
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Check if we have userData from route params first
-        if (route.params?.userData) {
-          console.log('Using userData from route params:', route.params.userData);
-          setUserData(route.params.userData);
-        } else {
-          // If not, fetch from API
-          const response = await userAPI.getProfile();
-          console.log('Fetched userData from API:', response.data);
-          setUserData(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [route.params?.userData]);
-
-  const { name, email } = userData || {};
-  const [gender, setGender] = useState('');
-  const [age, setAge] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+export default function EditProfileScreen({ navigation, route }) {
+  // Lấy thông tin người dùng từ route params hoặc API
+  const [userData, setUserData] = useState(route.params || null);
+  const [name, setName] = useState(userData?.name || '');
+  const [gender, setGender] = useState(userData?.gender || '');
+  const [age, setAge] = useState(userData?.age ? String(userData.age) : '');
+  const [weight, setWeight] = useState(userData?.weight ? String(userData.weight) : '');
+  const [height, setHeight] = useState(userData?.height ? String(userData.height) : '');
   const [weightUnit, setWeightUnit] = useState('KG');
   const [heightUnit, setHeightUnit] = useState('CM');
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
   
   useEffect(() => {
-    // Log thông tin người dùng khi màn hình được mở
-    if (name) {
-      console.log('Profile setup for:', { name, email });
+    // Nếu không có userData từ route params, fetch từ API
+    if (!userData) {
+      const fetchUserData = async () => {
+        try {
+          const response = await userAPI.getProfile();
+          const data = response.data;
+          setUserData(data);
+          setName(data.name || '');
+          setGender(data.gender || '');
+          setAge(data.age ? String(data.age) : '');
+          setWeight(data.weight ? String(data.weight) : '');
+          setHeight(data.height ? String(data.height) : '');
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          Alert.alert('Lỗi', 'Không thể tải thông tin người dùng. Vui lòng thử lại sau.');
+        }
+      };
+      fetchUserData();
     }
-  }, [name, email]);
+  }, [userData]);
 
-  const handleNext = async () => {
-    // Kiểm tra xem đã điền đầy đủ thông tin chưa
-    if (!gender || !age || !weight || !height) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
-      return;
-    }
-    
+  const handleSave = async () => {
     try {
-      // Kết hợp thông tin từ đăng ký và thông tin profile
+      // Kiểm tra xem có trường nào đã điền chưa
+      if (!name) {
+        Alert.alert('Lỗi', 'Vui lòng điền tên của bạn');
+        return;
+      }
+      
+      // Đảm bảo sử dụng đúng id từ MongoDB
       const userId = userData?.id;
       
       if (!userId) {
@@ -65,34 +67,28 @@ export default function ProfileScreen({ navigation, route }) {
         return;
       }
       
-      console.log('Using MongoDB ID for profile update:', userId);
-      
+      // Chuẩn bị dữ liệu cập nhật
       const profileData = {
         userId,
-        name: name || 'User',
-        gender, 
-        age: parseInt(age), 
-        weight: parseInt(weight), 
-        height: parseInt(height)
+        name,
+        ...(gender ? { gender } : {}),
+        ...(age ? { age: parseInt(age) } : {}),
+        ...(weight ? { weight: parseInt(weight) } : {}),
+        ...(height ? { height: parseInt(height) } : {})
       };
       
       // Gọi API để cập nhật thông tin profile
-      const response = await userAPI.completeProfile(profileData);
+      const response = await userAPI.updateProfile(profileData);
       
       // Lưu token nếu có
       if (response.data.token) {
         await AsyncStorage.setItem('token', response.data.token);
       }
       
-      // Chuyển đến màn hình chọn mục tiêu với thông tin đầy đủ
-      navigation.navigate('GoalSelection', { 
-        profileData: {
-          ...profileData,
-          ...response.data.user
-        }
-      });
+      Alert.alert('Thành công', 'Cập nhật thông tin thành công!');
+      navigation.goBack();
     } catch (error) {
-      console.error('Complete profile error:', error.response?.data || error.message);
+      console.error('Update profile error:', error.response?.data || error.message);
       Alert.alert(
         'Lỗi', 
         error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật thông tin. Vui lòng thử lại sau.'
@@ -105,27 +101,34 @@ export default function ProfileScreen({ navigation, route }) {
     setShowGenderDropdown(false);
   };
 
+  const handleCancel = () => {
+    navigation.goBack();
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Illustration Image */}
-      <View style={styles.illustrationContainer}>
-        <Image 
-          source={require('../assets/images/Vector-Section.png')} 
-          style={styles.illustrationImage}
-          resizeMode="contain"
-        />
-      </View>
-
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Let's complete your profile</Text>
-        <Text style={styles.subtitle}>
-          It will help us to know more about you!
-        </Text>
+        <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
+          <MaterialIcons name="arrow-back" size={24} color="#1D1617" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Edit Profile</Text>
+        <View style={styles.emptySpace} />
       </View>
 
       {/* Profile Form */}
       <View style={styles.form}>
+        {/* Name */}
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="person-outline" size={24} color="#ADA4A5" />
+          <TextInput
+            style={styles.input}
+            placeholder="Your Name"
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+
         {/* Choose Gender */}
         <View style={styles.genderInputContainer}>
           <MaterialIcons name="person-outline" size={24} color="#ADA4A5" style={styles.inputIcon} />
@@ -225,24 +228,20 @@ export default function ProfileScreen({ navigation, route }) {
         </View>
       </View>
 
-      {/* Next Button */}
+      {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <TouchableOpacity 
-          style={[
-            styles.nextButton,
-            (!gender || !age || !weight || !height) && styles.nextButtonDisabled
-          ]} 
-          onPress={handleNext}
-          disabled={!gender || !age || !weight || !height}
+          style={styles.cancelButton} 
+          onPress={handleCancel}
         >
-          <Text style={[
-            styles.nextButtonText,
-            (!gender || !age || !weight || !height) && styles.nextButtonTextDisabled
-          ]}>Next</Text>
-          <Text style={[
-            styles.arrowIcon,
-            (!gender || !age || !weight || !height) && styles.arrowIconDisabled
-          ]}>›</Text>
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.saveButton} 
+          onPress={handleSave}
+        >
+          <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -254,37 +253,33 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  illustrationContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  illustrationImage: {
-    width: width * 0.9,
-    height: height * 0.3,
-  },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 30,
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F7F8F8',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-    textAlign: 'center',
+    color: '#1D1617',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 22,
+  emptySpace: {
+    width: 40,
   },
   form: {
     paddingHorizontal: 20,
+    marginTop: 20,
     marginBottom: 40,
   },
   inputContainer: {
@@ -379,16 +374,33 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     marginBottom: 30,
   },
-  nextButton: {
-    backgroundColor: '#92A3FD',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#F7F8F8',
     paddingVertical: 18,
     borderRadius: 30,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#E1E5E9',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: '#92A3FD',
+    paddingVertical: 18,
+    borderRadius: 30,
+    marginLeft: 10,
+    alignItems: 'center',
     shadowColor: '#92A3FD',
     shadowOffset: {
       width: 0,
@@ -398,27 +410,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  nextButtonText: {
+  saveButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginRight: 8,
-  },
-  arrowIcon: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#E1E5E9',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  nextButtonTextDisabled: {
-    color: '#999',
-  },
-  arrowIconDisabled: {
-    color: '#999',
   },
   genderInputContainer: {
     flexDirection: 'row',

@@ -1,6 +1,7 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import AuthScreen from '../src/screens/AuthScreen';
+import EditProfileScreen from '../src/screens/EditProfileScreen';
 import ForgotPasswordScreen from '../src/screens/ForgotPasswordScreen';
 import GoalSelectionScreen from '../src/screens/GoalSelectionScreen';
 import HomeScreen from '../src/screens/HomeScreen';
@@ -28,6 +29,7 @@ export default function App() {
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="User" component={UserScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 }

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useRef, useState } from 'react';
 import {
   Alert,
@@ -9,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userAPI } from '../services/api';
 
 const { width, height } = Dimensions.get('window');
@@ -46,9 +46,22 @@ export default function GoalSelectionScreen({ navigation, route }) {
         // Lấy dữ liệu profile từ route params
         const profileData = route.params?.profileData;
         
-        // Chuẩn bị dữ liệu cập nhật
+        // Kiểm tra và log dữ liệu profileData để debug
+        console.log('ProfileData received in GoalSelectionScreen:', profileData);
+        
+        // Kiểm tra nếu profileData không tồn tại
+        if (!profileData) {
+          throw new Error('Không tìm thấy thông tin người dùng');
+        }
+        
+        // Chuẩn bị dữ liệu cập nhật, sử dụng id hoặc userId tùy theo cái nào có sẵn
+        const userId = profileData.id || profileData.userId;
+        if (!userId) {
+          throw new Error('Không tìm thấy ID người dùng');
+        }
+        
         const updateData = {
-          userId: profileData.userId,
+          userId: userId,
           goals: selectedGoals.map(goal => goal.title)
         };
         

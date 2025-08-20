@@ -100,10 +100,10 @@ const handleVerify = async () => {
         await AsyncStorage.setItem("token", res.data.token);
       }
 
-      // Chuyển đến màn hình Profile với userId và name để hoàn tất thông tin
+      // Chuyển đến màn hình Profile với id và name để hoàn tất thông tin
       navigation.replace("Profile", { 
         userData: {
-          userId: res.data.userId,
+          id: res.data.userId, // Sử dụng 'id' thay vì 'userId' để phù hợp với cấu trúc MongoDB
           email: email,
           name: res.data.name || ''
         }
