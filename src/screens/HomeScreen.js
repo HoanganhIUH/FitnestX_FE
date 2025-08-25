@@ -20,7 +20,11 @@ export default function HomeScreen({ navigation, route }) {
     };
 
     fetchUserData();
-  }, []);
+     const unsubscribe = navigation.addListener('focus', () => {
+      fetchUserData();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   // Lấy chiều cao và cân nặng từ userData hoặc sử dụng giá trị mặc định
   const fullName = userData?.name || 'Người dùng';

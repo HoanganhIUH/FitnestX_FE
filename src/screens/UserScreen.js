@@ -1,6 +1,6 @@
 import { Feather, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { userAPI } from '../services/api';
 import { calculateBMI } from '../utils/bmiCalculator';
 
@@ -26,29 +26,22 @@ export default function UserScreen({ navigation, route }) {
   const [userData, setUserData] = React.useState(null);
 
   // Tạo hàm fetchUserData để có thể gọi lại khi cần
-  const fetchUserData = React.useCallback(async () => {
-    try {
-      const response = await userAPI.getProfile();
-      console.log('User data from API:', response.data);
-      setUserData(response.data);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  }, []);
-
-  // Gọi fetchUserData khi component mount và khi navigation focus
   React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await userAPI.getProfile();
+        setUserData(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
     fetchUserData();
-    
-    // Thêm listener để refresh dữ liệu khi màn hình được focus (quay lại từ màn hình khác)
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log('UserScreen focused - refreshing data');
       fetchUserData();
     });
-
-    // Clean up listener khi component unmount
     return unsubscribe;
-  }, [fetchUserData, navigation]);
+  }, [navigation]);
 
 
   const fullName = userData?.name || 'Người dùng';
@@ -82,6 +75,21 @@ export default function UserScreen({ navigation, route }) {
   // Xử lý khi người dùng chuyển đổi thông báo
   const toggleNotifications = () => {
     setNotificationsEnabled(previousState => !previousState);
+  };
+
+  // Xử lý khi người dùng đăng xuất
+  const handleLogout = () => {
+    // Xóa dữ liệu người dùng khỏi state
+    setUserData(null);
+    // Hiển thị thông báo đăng xuất thành công
+    Alert.alert('Đăng xuất thành công', 'Bạn đã đăng xuất thành công');
+    // Tự động chuyển về màn hình login sau 2 giây
+    setTimeout(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    }, 2000);
   };
 
   return (
@@ -239,6 +247,14 @@ export default function UserScreen({ navigation, route }) {
               <Ionicons name="settings-outline" size={20} color="#92A3FD" />
             </View>
             <Text style={styles.menuItemText}>Settings</Text>
+            <Feather name="chevron-right" size={20} color="#ADA4A5" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+            <View style={styles.menuIconContainer}>
+              <Ionicons name="log-out" size={20} color="#FF3B30" />
+            </View>
+            <Text style={styles.logoutText}>Log Out</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
         </View>
@@ -415,6 +431,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: '#1D1617',
+  },
+  logoutText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#FF3B30',
+    fontWeight: '600',
   },
   switch: {
     transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],

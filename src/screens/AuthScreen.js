@@ -27,7 +27,6 @@ const handleLogin = async () => {
     };
     navigation.replace('Welcome', { userData });
   } catch (error) {
-    console.error("Login error:", error.response?.data || error.message);
     alert(error.response?.data?.message || "Email hoặc mật khẩu không đúng!");
   }
 };
