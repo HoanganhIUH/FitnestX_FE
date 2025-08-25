@@ -1,4 +1,4 @@
-import { Feather, FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
@@ -28,6 +28,30 @@ export default function HomeScreen({ navigation, route }) {
 
   // Lấy chiều cao và cân nặng từ userData hoặc sử dụng giá trị mặc định
   const fullName = userData?.name || 'Người dùng';
+  let goalsArray = [];
+  if (Array.isArray(userData?.goal)) {
+    goalsArray = userData.goal;
+  } else if (userData?.goal) {
+  if (typeof userData.goal === 'string') {
+    try {
+      const parsed = JSON.parse(userData.goal);
+      goalsArray = Array.isArray(parsed) ? parsed : [userData.goal];
+    } catch (err) {
+      goalsArray = [userData.goal];
+    }
+  } else {
+    goalsArray = [userData.goal];
+  }
+}
+
+  const goalNames = goalsArray
+  .map(g => (typeof g === 'string' ? g : (g?.title || '')))
+  .filter(Boolean);
+
+const programSubtitle = goalNames.length
+  ? `${goalNames.slice(0, 2).join(' + ')}${goalNames.length > 2 ? ` +${goalNames.length - 2}` : ''}`
+  : '';
+
   const height = userData?.height || '170';
   const weight = userData?.weight || '65';
   const heightUnit = userData?.heightUnit || 'CM';
@@ -54,11 +78,12 @@ export default function HomeScreen({ navigation, route }) {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.welcomeText}>Welcome Back,</Text>
+            <Text style={styles.welcomeText}>Chào mừng</Text>
             <Text style={styles.userName}>{fullName}</Text>
+            <Text style={styles.userSubtitle}>{programSubtitle}</Text>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
-            <Feather name="bell" size={24} color="black" />
+            <Feather name="bell" size={24} color="#1D1617" />
           </TouchableOpacity>
         </View>
 
@@ -66,12 +91,12 @@ export default function HomeScreen({ navigation, route }) {
         <View style={styles.bmiCard}>
           <View style={styles.bmiInfo}>
             <Text style={styles.bmiTitle}>BMI (Body Mass Index)</Text>
-            <Text style={styles.bmiSubtitle}>You have a {bmi.category.toLowerCase()} weight</Text>
+            <Text style={styles.bmiSubtitle}>Bạn có thể trạng {bmi.category}</Text>
             <TouchableOpacity 
               style={styles.viewMoreButton}
               onPress={() => navigation.navigate('User', userData)}
             >
-              <Text style={styles.viewMoreText}>View More</Text>
+              <Text style={styles.viewMoreText}>Xem thêm</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.bmiChart}>
@@ -81,78 +106,50 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Today Target */}
-        <View style={styles.targetContainer}>
-          <Text style={styles.sectionTitle}>Today Target</Text>
-          <TouchableOpacity style={styles.checkButton}>
-            <Text style={styles.checkButtonText}>Check</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Activity Status */}
-        <Text style={styles.sectionTitle}>Activity Status</Text>
-        
-        {/* Heart Rate Card */}
-        <View style={styles.heartRateCard}>
-          <View style={styles.heartRateHeader}>
-            <Text style={styles.heartRateTitle}>Heart Rate</Text>
-            <View style={styles.heartRateValue}>
-              <Text style={styles.heartRateNumber}>78</Text>
-              <Text style={styles.heartRateUnit}>BPM</Text>
-            </View>
+        {/* Schedule Card */}
+        <View style={styles.scheduleCard}>
+          <View style={styles.scheduleHeader}>
+            <Text style={styles.scheduleTitle}>Lịch Tập</Text>
+            <TouchableOpacity style={styles.pillButton}>
+              <Text style={styles.pillButtonText}>Chi tiết</Text>
+            </TouchableOpacity>
           </View>
-          
-          <View style={styles.heartRateChart}>
-            {/* Placeholder for heart rate chart */}
-            <View style={styles.chartLine}></View>
+          <View style={styles.scheduleRow}>
+            <Text style={styles.scheduleName}>Smash cơ bản</Text>
+            <Text style={styles.scheduleTime}>7:00 AM</Text>
           </View>
-          
-          <View style={styles.timeAgoContainer}>
-            <Text style={styles.timeAgoText}>3 mins ago</Text>
+          <View style={styles.scheduleFooter}>
+            <Text style={styles.scheduleLabel}>Hôm nay</Text>
+            <TouchableOpacity style={[styles.pillButton, styles.pillSuccess]}>
+              <Text style={[styles.pillButtonText, styles.pillSuccessText]}>Bắt đầu ngay</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Water and Sleep Row */}
-        <View style={styles.statsRow}>
-          {/* Water Intake */}
-          <View style={styles.waterCard}>
-            <Text style={styles.statTitle}>Water Intake</Text>
-            <Text style={styles.waterValue}>4 Liters</Text>
-            <Text style={styles.statSubtitle}>Real time updates</Text>
-            
-            {/* Water intake chart */}
-            <View style={styles.waterChart}>
-              <View style={styles.waterBar}></View>
-            </View>
+        {/* Meal Card */}
+        <View style={styles.mealCard}>
+          <View style={styles.scheduleHeader}>
+            <Text style={styles.mealTitle}>Thực đơn hôm nay</Text>
+            <TouchableOpacity style={styles.pillButtonDanger}>
+              <Text style={styles.pillButtonDangerText}>Chi tiết</Text>
+            </TouchableOpacity>
           </View>
-
-          {/* Sleep */}
-          <View style={styles.sleepCard}>
-            <Text style={styles.statTitle}>Sleep</Text>
-            <Text style={styles.sleepValue}>8h 20m</Text>
-            
-            {/* Sleep chart */}
-            <View style={styles.sleepChart}>
-              <View style={styles.sleepWave}></View>
-            </View>
+          <View style={styles.mealRow}>
+            <Text style={styles.mealCaloriesLeft}>1450/2500</Text>
+            <Text style={styles.mealCaloriesLabel}>Calories</Text>
           </View>
+          <View style={styles.progressBar}>
+            <View style={styles.progressFill} />
+          </View>
+          <Text style={styles.mealFooter}>Bữa sáng</Text>
         </View>
 
-        {/* Calories */}
-        <View style={styles.caloriesCard}>
-          <Text style={styles.statTitle}>Calories</Text>
-          <View style={styles.caloriesContent}>
-            <Text style={styles.caloriesValue}>760 kCal</Text>
-            <View style={styles.caloriesChart}>
-              <View style={styles.caloriesProgress}></View>
-            </View>
-          </View>
-        </View>
+        {/* Progress */}
+        <Text style={styles.sectionTitle}>Tiến trình</Text>
 
         {/* Workout Progress */}
         <View style={styles.workoutProgressContainer}>
           <View style={styles.workoutProgressHeader}>
-            <Text style={styles.sectionTitle}>Workout Progress</Text>
             <View style={styles.weeklyButton}>
               <Text style={styles.weeklyButtonText}>Weekly</Text>
               <Feather name="chevron-down" size={16} color="#92A3FD" />
@@ -190,61 +187,7 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Latest Workout */}
-        <View style={styles.latestWorkoutContainer}>
-          <View style={styles.latestWorkoutHeader}>
-            <Text style={styles.sectionTitle}>Latest Workout</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeMoreText}>See more</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {/* Workout Items */}
-          <View style={styles.workoutItem}>
-            <View style={styles.workoutItemLeft}>
-              <View style={styles.workoutIcon}>
-                <FontAwesome5 name="dumbbell" size={20} color="#92A3FD" />
-              </View>
-              <View style={styles.workoutInfo}>
-                <Text style={styles.workoutName}>Fullbody Workout</Text>
-                <Text style={styles.workoutDetails}>180 Calories Burn | 20 minutes</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.workoutButton}>
-              <Feather name="chevron-right" size={20} color="#92A3FD" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.workoutItem}>
-            <View style={styles.workoutItemLeft}>
-              <View style={[styles.workoutIcon, styles.workoutIconPurple]}>
-                <FontAwesome5 name="dumbbell" size={20} color="#C58BF2" />
-              </View>
-              <View style={styles.workoutInfo}>
-                <Text style={styles.workoutName}>Lowerbody Workout</Text>
-                <Text style={styles.workoutDetails}>200 Calories Burn | 30 minutes</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.workoutButton}>
-              <Feather name="chevron-right" size={20} color="#92A3FD" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.workoutItem}>
-            <View style={styles.workoutItemLeft}>
-              <View style={styles.workoutIcon}>
-                <FontAwesome5 name="dumbbell" size={20} color="#92A3FD" />
-              </View>
-              <View style={styles.workoutInfo}>
-                <Text style={styles.workoutName}>Ab Workout</Text>
-                <Text style={styles.workoutDetails}>150 Calories Burn | 15 minutes</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.workoutButton}>
-              <Feather name="chevron-right" size={20} color="#92A3FD" />
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Latest Workout removed to match simplified mock */}
         
         {/* Bottom spacing */}
         <View style={styles.bottomSpacing}></View>
@@ -293,13 +236,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   welcomeText: {
-    fontSize: 14,
+    fontSize: 20,
     color: '#ADA4A5',
+    marginBottom: 4,
   },
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#1D1617',
+  },
+  userSubtitle: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#7B6F72',
   },
   notificationButton: {
     width: 40,
@@ -370,6 +319,128 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+
+  // Schedule Card
+  scheduleCard: {
+    backgroundColor: '#C7E9E5',
+    borderRadius: 22,
+    padding: 20,
+    marginBottom: 16,
+  },
+  scheduleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  scheduleTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1D1617',
+  },
+  pillButton: {
+    backgroundColor: '#EEF6FF',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  pillButtonText: {
+    color: '#92A3FD',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  scheduleName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1D1617',
+  },
+  scheduleTime: {
+    fontSize: 14,
+    color: '#1D1617',
+    opacity: 0.8,
+  },
+  scheduleFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  scheduleLabel: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    color: '#1D1617',
+    fontSize: 12,
+  },
+  pillSuccess: {
+    backgroundColor: '#E4F8EA',
+  },
+  pillSuccessText: {
+    color: '#3BB273',
+  },
+
+  // Meal Card
+  mealCard: {
+    backgroundColor: '#EEDCCF',
+    borderRadius: 22,
+    padding: 20,
+    marginBottom: 16,
+  },
+  mealTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1D1617',
+  },
+  pillButtonDanger: {
+    backgroundColor: '#FFE9E8',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  pillButtonDangerText: {
+    color: '#FF6B6B',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  mealRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  mealCaloriesLeft: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1D1617',
+  },
+  mealCaloriesLabel: {
+    fontSize: 12,
+    color: '#7B6F72',
+  },
+  progressBar: {
+    height: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    width: '60%',
+    height: '100%',
+    backgroundColor: '#7ED7B5',
+    borderRadius: 6,
+  },
+  mealFooter: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#7B6F72',
   },
   
   // Today Target

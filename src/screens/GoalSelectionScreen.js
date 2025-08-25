@@ -17,22 +17,32 @@ const { width, height } = Dimensions.get('window');
 const goals = [
   {
     id: 1,
-    title: 'Improve Shape',
-    description: 'I have a low amount of body fat and need / want to build more muscle',
+    title: 'Tăng cơ',
+    description:
+      'Muốn tăng khối lượng cơ, nâng cao sức mạnh và vóc dáng săn chắc.',
     image: require('../assets/images/Vector.png'),
   },
   {
     id: 2,
-    title: 'Lean & Tone',
-    description: 'I\'m "skinny fat", look thin but have no shape. I want to add lean muscle in the right way',
+    title: 'Giảm mỡ',
+    description:
+      'Muốn giảm mỡ thừa, cải thiện độ săn chắc và sức bền.',
     image: require('../assets/images/Vector(1).png'),
   },
   {
     id: 3,
-    title: 'Lose a Fat',
-    description: 'I have over 20 lbs to lose. I want to drop all this fat and gain muscle mass',
+    title: 'Duy trì thể trạng',
+    description:
+      'Giữ cân nặng và sức khỏe ổn định, duy trì phong độ luyện tập.',
     image: require('../assets/images/Vector(2).png'),
   },
+  {
+    id: 4,
+    title: 'Nâng cao kỹ thuật cầu lông',
+    description:
+      'Tập trung nâng cao kỹ thuật đánh cầu, di chuyển, phản xạ và chiến thuật.',
+    image: require('../assets/images/Vector(2).png'),
+  }
 ];
 
 export default function GoalSelectionScreen({ navigation, route }) {
@@ -124,15 +134,15 @@ export default function GoalSelectionScreen({ navigation, route }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>What is your goal ?</Text>
-        <Text style={styles.subtitle}>It will help us to choose a best program for you</Text>
-        <Text style={styles.hintText}>You can select multiple goals if needed</Text>
+        <Text style={styles.title}>Bạn muốn đạt mục tiêu gì?</Text>
+        <Text style={styles.subtitle}>Chúng tôi sẽ chọn lộ trình phù hợp cho người mới tập cầu lông</Text>
+        <Text style={styles.hintText}>Bạn có thể chọn nhiều mục tiêu cùng lúc</Text>
         
         {/* Selected Goals Counter */}
         {selectedGoals.length > 0 && (
           <View style={styles.selectedCounter}>
             <Text style={styles.selectedCounterText}>
-              {selectedGoals.length} {selectedGoals.length === 1 ? 'Goal' : 'Goals'} Selected
+              Đã chọn {selectedGoals.length} mục tiêu
             </Text>
           </View>
         )}
@@ -168,7 +178,7 @@ export default function GoalSelectionScreen({ navigation, route }) {
                    styles.selectButtonText,
                    selectedGoals.find(g => g.id === goal.id) && styles.selectButtonTextActive
                  ]}>
-                   {selectedGoals.find(g => g.id === goal.id) ? 'Selected' : 'Select'}
+                   {selectedGoals.find(g => g.id === goal.id) ? 'Đã chọn' : 'Chọn'}
                  </Text>
                </TouchableOpacity>
             </View>
@@ -199,9 +209,7 @@ export default function GoalSelectionScreen({ navigation, route }) {
         onPress={handleConfirm}
         disabled={selectedGoals.length === 0}
       >
-        <Text style={styles.confirmButtonText}>
-          Confirm ({selectedGoals.length} {selectedGoals.length === 1 ? 'Goal' : 'Goals'})
-        </Text>
+        <Text style={styles.confirmButtonText}>Xác nhận ({selectedGoals.length} mục tiêu)</Text>
       </TouchableOpacity>
     </View>
   );

@@ -95,17 +95,9 @@ export default function UserScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <Feather name="chevron-left" size={24} color="#1D1617" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <TouchableOpacity style={styles.moreButton}>
-            <Feather name="more-horizontal" size={24} color="#1D1617" />
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Hồ sơ</Text>
         </View>
-        
         {/* Profile Info */}
         <View style={styles.profileContainer}>
           <View style={styles.profileInfo}>
@@ -125,30 +117,28 @@ export default function UserScreen({ navigation, route }) {
         
         {/* User Stats */}
         <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
+          <View style={[styles.statItem, styles.statItemDivider]}>
             <Text style={styles.statValue}>{userHeight}</Text>
-            <Text style={styles.statLabel}>Height</Text>
+            <Text style={styles.statLabel}>Chiều cao</Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
+          <View style={[styles.statItem, styles.statItemDivider]}>
             <Text style={styles.statValue}>{userWeight}</Text>
-            <Text style={styles.statLabel}>Weight</Text>
+            <Text style={styles.statLabel}>Cân nặng</Text>
           </View>
-          <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{userAge}</Text>
-            <Text style={styles.statLabel}>Age</Text>
+            <Text style={styles.statLabel}>Tuổi</Text>
           </View>
         </View>
         
         {/* BMI Display */}
         <View style={styles.bmiContainer}>
           <View style={styles.bmiHeader}>
-            <Text style={styles.bmiTitle}>BMI (Body Mass Index)</Text>
+            <Text style={styles.bmiTitle}>BMI (Chỉ số khối cơ thể)</Text>
             <Text style={[styles.bmiValue, { color: getBmiColor(bmi.value) }]}>{bmi.value}</Text>
           </View>
           <View style={styles.bmiCategoryContainer}>
-            <Text style={styles.bmiCategoryLabel}>Category:</Text>
+            <Text style={styles.bmiCategoryLabel}>Phân loại:</Text>
             <Text style={[styles.bmiCategory, { color: getBmiColor(bmi.value) }]}>{bmi.category}</Text>
           </View>
           <View style={styles.bmiScaleContainer}>
@@ -157,23 +147,23 @@ export default function UserScreen({ navigation, route }) {
               <View style={[styles.bmiScaleIndicator, { left: `${getBmiPercentage(bmi.value)}%` }]} />
             </View>
             <View style={styles.bmiScaleLabels}>
-              <Text style={styles.bmiScaleLabel}>Underweight</Text>
-              <Text style={styles.bmiScaleLabel}>Normal</Text>
-              <Text style={styles.bmiScaleLabel}>Overweight</Text>
-              <Text style={styles.bmiScaleLabel}>Obese</Text>
+              <Text style={styles.bmiScaleLabel}>Gầy</Text>
+              <Text style={styles.bmiScaleLabel}>Bình thường</Text>
+              <Text style={styles.bmiScaleLabel}>Thừa cân</Text>
+              <Text style={styles.bmiScaleLabel}>Béo phì</Text>
             </View>
           </View>
         </View>
         
         {/* Account Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={styles.sectionTitle}>Tài khoản</Text>
           
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="person-outline" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Personal Data</Text>
+            <Text style={styles.menuItemText}>Dữ liệu cá nhân</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
           
@@ -181,7 +171,7 @@ export default function UserScreen({ navigation, route }) {
             <View style={styles.menuIconContainer}>
               <MaterialIcons name="emoji-events" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Achievement</Text>
+            <Text style={styles.menuItemText}>Thành tựu</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
           
@@ -189,7 +179,7 @@ export default function UserScreen({ navigation, route }) {
             <View style={styles.menuIconContainer}>
               <Ionicons name="time-outline" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Activity History</Text>
+            <Text style={styles.menuItemText}>Lịch sử hoạt động</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
           
@@ -197,20 +187,20 @@ export default function UserScreen({ navigation, route }) {
             <View style={styles.menuIconContainer}>
               <MaterialCommunityIcons name="chart-timeline-variant" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Workout Progress</Text>
+            <Text style={styles.menuItemText}>Tiến độ tập luyện</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
         </View>
         
         {/* Notification Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Notification</Text>
+          <Text style={styles.sectionTitle}>Thông báo</Text>
           
           <View style={styles.menuItem}>
             <View style={styles.menuIconContainer}>
               <Ionicons name="notifications-outline" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Pop-up Notification</Text>
+            <Text style={styles.menuItemText}>Thông báo bật lên</Text>
             <Switch
               trackColor={{ false: "#E6E7F2", true: "#C58BF2" }}
               thumbColor={notificationsEnabled ? "#FFFFFF" : "#FFFFFF"}
@@ -224,13 +214,13 @@ export default function UserScreen({ navigation, route }) {
         
         {/* Other Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Other</Text>
+          <Text style={styles.sectionTitle}>Khác</Text>
           
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuIconContainer}>
               <MaterialIcons name="headset-mic" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Contact Us</Text>
+            <Text style={styles.menuItemText}>Liên hệ</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
           
@@ -238,7 +228,7 @@ export default function UserScreen({ navigation, route }) {
             <View style={styles.menuIconContainer}>
               <MaterialIcons name="privacy-tip" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Privacy Policy</Text>
+            <Text style={styles.menuItemText}>Chính sách bảo mật</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
           
@@ -246,7 +236,7 @@ export default function UserScreen({ navigation, route }) {
             <View style={styles.menuIconContainer}>
               <Ionicons name="settings-outline" size={20} color="#92A3FD" />
             </View>
-            <Text style={styles.menuItemText}>Settings</Text>
+            <Text style={styles.menuItemText}>Cài đặt</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
 
@@ -254,7 +244,7 @@ export default function UserScreen({ navigation, route }) {
             <View style={styles.menuIconContainer}>
               <Ionicons name="log-out" size={20} color="#FF3B30" />
             </View>
-            <Text style={styles.logoutText}>Log Out</Text>
+            <Text style={styles.logoutText}>Đăng xuất</Text>
             <Feather name="chevron-right" size={20} color="#ADA4A5" />
           </TouchableOpacity>
         </View>
@@ -297,10 +287,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'center',  // căn giữa theo chiều ngang
     marginTop: 50,
     marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 25,
+    fontWeight: 'bold',
   },
   backButton: {
     width: 40,
@@ -309,11 +302,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8F8',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1D1617',
   },
   moreButton: {
     width: 40,
@@ -375,29 +363,36 @@ const styles = StyleSheet.create({
   // Stats
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F7F8F8',
-    borderRadius: 16,
-    paddingVertical: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 16,
     marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 4,
+  },
+  statItemDivider: {
+    borderRightWidth: 1,
+    borderRightColor: '#E6E7F2',
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#92A3FD',
-    marginBottom: 5,
+    color: '#1D1617',
+    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#7B6F72',
   },
   statDivider: {
-    width: 1,
-    height: '80%',
-    backgroundColor: '#E6E7F2',
   },
   
   // Sections

@@ -110,7 +110,7 @@ export default function ProfileScreen({ navigation, route }) {
       {/* Illustration Image */}
       <View style={styles.illustrationContainer}>
         <Image 
-          source={require('../assets/images/Vector-Section.png')} 
+          source={require('../assets/images/Rectangle 5708.png')} 
           style={styles.illustrationImage}
           resizeMode="contain"
         />
@@ -118,9 +118,9 @@ export default function ProfileScreen({ navigation, route }) {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Let's complete your profile</Text>
+        <Text style={styles.title}>Hoàn thiện hồ sơ của bạn</Text>
         <Text style={styles.subtitle}>
-          It will help us to know more about you!
+          Điều này giúp chúng tôi hiểu rõ về bạn hơn!
         </Text>
       </View>
 
@@ -134,7 +134,7 @@ export default function ProfileScreen({ navigation, route }) {
             onPress={() => setShowGenderDropdown(!showGenderDropdown)}
           >
             <Text style={[styles.genderText, !gender && styles.placeholderText]}>
-              {gender || 'Choose Gender'}
+              {gender || 'Chọn giới tính'}
             </Text>
             <Text style={styles.dropdownIcon}>▼</Text>
           </TouchableOpacity>
@@ -144,21 +144,21 @@ export default function ProfileScreen({ navigation, route }) {
             <View style={styles.dropdownContainer}>
               <TouchableOpacity 
                 style={styles.dropdownItem}
-                onPress={() => selectGender('Male')}
+                onPress={() => selectGender('Nam')}
               >
-                <Text style={styles.dropdownItemText}>Male</Text>
+                <Text style={styles.dropdownItemText}>Nam</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.dropdownItem}
-                onPress={() => selectGender('Female')}
+                onPress={() => selectGender('Nữ')}
               >
-                <Text style={styles.dropdownItemText}>Female</Text>
+                <Text style={styles.dropdownItemText}>Nữ</Text>
               </TouchableOpacity>
                <TouchableOpacity 
                 style={styles.dropdownItem}
-                onPress={() => selectGender('Other')}
+                onPress={() => selectGender('Khác')}
               >
-                <Text style={styles.dropdownItemText}>Other</Text>
+                <Text style={styles.dropdownItemText}>Khác</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -169,7 +169,7 @@ export default function ProfileScreen({ navigation, route }) {
           <MaterialIcons name="cake" size={24} color="#ADA4A5" />
           <TextInput
             style={styles.input}
-            placeholder="Your Age"
+            placeholder="Tuổi"
             value={age}
             onChangeText={setAge}
             keyboardType="numeric"
@@ -181,7 +181,7 @@ export default function ProfileScreen({ navigation, route }) {
           <MaterialCommunityIcons name="scale-bathroom" size={24} color="#ADA4A5" />
           <TextInput
             style={styles.input}
-            placeholder="Your Weight"
+            placeholder="Cân nặng"
             value={weight}
             onChangeText={setWeight}
             keyboardType="numeric"
@@ -205,7 +205,7 @@ export default function ProfileScreen({ navigation, route }) {
           <MaterialCommunityIcons name="ruler" size={24} color="#ADA4A5" />
           <TextInput
             style={styles.input}
-            placeholder="Your Height"
+            placeholder="Chiều cao"
             value={height}
             onChangeText={setHeight}
             keyboardType="numeric"
@@ -238,7 +238,7 @@ export default function ProfileScreen({ navigation, route }) {
           <Text style={[
             styles.nextButtonText,
             (!gender || !age || !weight || !height) && styles.nextButtonTextDisabled
-          ]}>Next</Text>
+          ]}>Tiếp tục</Text>
           <Text style={[
             styles.arrowIcon,
             (!gender || !age || !weight || !height) && styles.arrowIconDisabled

@@ -34,12 +34,12 @@ const handleRegister = async () => {
     const payload = { name: fullName, email, password };
     const res = await authAPI.register(payload);
 
-    console.log("Đăng ký thành công:", res.data);
+    // Khi nhập đầy đủ thông tin, qua trang otp
+    alert("Đăng ký thành công!");
 
     // Chuyển qua màn OTPVerification
     navigation.navigate("OTPVerification", { userData: { email } });
   } catch (error) {
-    console.error("Lỗi đăng ký:", error.response?.data || error.message);
     alert(error.response?.data?.message || "Có lỗi xảy ra khi đăng ký");
   }
 };
