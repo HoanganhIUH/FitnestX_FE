@@ -8,6 +8,7 @@ import { calculateBMI } from '../utils/bmiCalculator';
 export default function HomeScreen({ navigation, route }) {
   // Lấy thông tin người dùng từ API
   const [userData, setUserData] = React.useState(null);
+  const [activeTab, setActiveTab] = React.useState('home');
 
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -20,8 +21,9 @@ export default function HomeScreen({ navigation, route }) {
     };
 
     fetchUserData();
-     const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener('focus', () => {
       fetchUserData();
+      setActiveTab('home');
     });
     return unsubscribe;
   }, [navigation]);
@@ -195,11 +197,20 @@ const programSubtitle = goalNames.length
       
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="home" size={24} color="#92A3FD" />
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => setActiveTab('home')}
+        >
+          <Ionicons name="home" size={24} color={activeTab === 'home' ? '#92A3FD' : '#ADA4A5'} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Feather name="activity" size={24} color="#ADA4A5" />
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => {
+            setActiveTab('workout');
+            navigation.navigate('Workout');
+          }}
+        >
+          <Feather name="activity" size={24} color={activeTab === 'workout' ? '#92A3FD' : '#ADA4A5'} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton}>
           <Feather name="search" size={24} color="#FFFFFF" />
@@ -209,9 +220,12 @@ const programSubtitle = goalNames.length
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.navItem} 
-          onPress={() => navigation.navigate('User', userData)}
+          onPress={() => {
+            setActiveTab('user');
+            navigation.navigate('User', userData);
+          }}
         >
-          <Feather name="user" size={24} color="#ADA4A5" />
+          <Feather name="user" size={24} color={activeTab === 'user' ? '#92A3FD' : '#ADA4A5'} />
         </TouchableOpacity>
       </View>
     </View>

@@ -1,6 +1,7 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import AuthScreen from '../src/screens/AuthScreen';
+import BadmintonSkillsScreen from '../src/screens/BadmintonSkillsScreen';
 import EditProfileScreen from '../src/screens/EditProfileScreen';
 import ForgotPasswordScreen from '../src/screens/ForgotPasswordScreen';
 import GoalSelectionScreen from '../src/screens/GoalSelectionScreen';
@@ -12,6 +13,7 @@ import RegisterScreen from '../src/screens/RegisterScreen';
 import ResetPasswordScreen from '../src/screens/ResetPasswordScreen';
 import UserScreen from '../src/screens/UserScreen';
 import WelcomeScreen from '../src/screens/WelcomeScreen';
+import WorkoutScreen from '../src/screens/WorkoutScreen';
 
 const Stack = createStackNavigator();
 
@@ -28,6 +30,8 @@ export default function App() {
       <Stack.Screen name="GoalSelection" component={GoalSelectionScreen} />
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Workout" component={WorkoutScreen} />
+      <Stack.Screen name="BadmintonSkills" component={BadmintonSkillsScreen} />
       <Stack.Screen name="User" component={UserScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
