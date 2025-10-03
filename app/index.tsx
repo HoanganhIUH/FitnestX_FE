@@ -2,7 +2,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import AuthScreen from '../src/screens/AuthScreen';
 import BadmintonSkillsScreen from '../src/screens/BadmintonSkillsScreen';
+import BasicScreen from '../src/screens/BasicScreen';
 import EditProfileScreen from '../src/screens/EditProfileScreen';
+import ExerciseDetailScreen from '../src/screens/ExerciseDetailScreen';
 import ForgotPasswordScreen from '../src/screens/ForgotPasswordScreen';
 import GoalSelectionScreen from '../src/screens/GoalSelectionScreen';
 import HomeScreen from '../src/screens/HomeScreen';
@@ -34,6 +36,8 @@ export default function App() {
       <Stack.Screen name="BadmintonSkills" component={BadmintonSkillsScreen} />
       <Stack.Screen name="User" component={UserScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Basic" component={BasicScreen} />
+      <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
     </Stack.Navigator>
   );
 }

@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function BadmintonSkillsScreen({ navigation }) {
@@ -49,7 +48,10 @@ export default function BadmintonSkillsScreen({ navigation }) {
           <Text style={styles.sectionTitle}>Bạn muốn bắt đầu từ đâu ?</Text>
           
           {/* Basic Level Card */}
-          <TouchableOpacity style={styles.levelCard}>
+          <TouchableOpacity 
+            style={styles.levelCard}
+            onPress={() => navigation.navigate('Basic')}
+          >
             <Text style={styles.levelTitle}>Cơ bản</Text>
             <Text style={styles.levelSubtitle}>Mô tả</Text>
             <TouchableOpacity style={styles.seeMoreButton}>
